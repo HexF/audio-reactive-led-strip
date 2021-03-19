@@ -72,9 +72,10 @@ def _update_esp8266():
         m = '' if _is_python_2 else []
         for i in packet_indices:
             if _is_python_2:
-                m += chr(i) + chr(p[0][i]) + chr(p[1][i]) + chr(p[2][i])
+                m += chr(i//8) + chr(i>>8) + chr(p[0][i]) + chr(p[1][i]) + chr(p[2][i])
             else:
-                m.append(i)  # Index of pixel to change
+                m.append(i//8)  # Index of pixel to change
+                m.append(i>>8)
                 m.append(p[0][i])  # Pixel red value
                 m.append(p[1][i])  # Pixel green value
                 m.append(p[2][i])  # Pixel blue value
