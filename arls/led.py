@@ -3,7 +3,7 @@ from __future__ import division
 
 import platform
 import numpy as np
-import config
+import arls.config as config
 import socket
 
 

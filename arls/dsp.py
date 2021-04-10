@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
-import config
-import melbank
+import arls.config as config
+import arls.melbank as melbank
 
 
 class ExpFilter:

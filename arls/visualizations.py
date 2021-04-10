@@ -1,6 +1,7 @@
 import numpy as np
-import config
-import dsp
+import arls.config as config
+import arls.dsp as dsp
+
 from scipy.ndimage.filters import gaussian_filter1d
 
 r_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),

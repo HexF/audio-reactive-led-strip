@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import pyaudio
-import config
+import arls.config as config
 
 
 def start_stream(callback):

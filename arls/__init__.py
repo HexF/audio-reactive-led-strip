@@ -3,11 +3,11 @@ from __future__ import division
 from scipy.ndimage.filters import gaussian_filter1d
 import time
 import numpy as np
-import config
-import microphone
-import dsp
-import led
-import visualizations
+import arls.config as config
+import arls.microphone as microphone
+import arls.dsp as dsp
+import arls.led as led
+import arls.visualizations as visualizations
 
 _time_prev = time.time() * 1000.0
 """The previous time that the frames_per_second() function was called"""
@@ -103,7 +103,7 @@ visualization_effect = getattr(visualizations,config.VISUALIZATION)
 """Visualization effect to display on the LED strip"""
 
 
-if __name__ == '__main__':
+def main():
     # Initialize LEDs
     led.update()
     # Start listening to live audio stream
