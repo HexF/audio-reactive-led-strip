@@ -19,11 +19,11 @@ cfg.read_dict({
         'sample_frequency': '44100'
     },
     'dsp': {
-        'min_frequency' = '200',
-        'max_frequency' = '12000',
-        'fft_bins' = '24',
-        'min_volume_threshold' = '1e-7',
-        'history_frames' = '2'
+        'min_frequency': '200',
+        'max_frequency': '12000',
+        'fft_bins': '24',
+        'min_volume_threshold': '1e-7',
+        'history_frames': '2'
     }
 })
 
