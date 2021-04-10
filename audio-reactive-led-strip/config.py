@@ -5,7 +5,7 @@ import os
 import configparser
 
 cfg = configparser.ConfigParser()
-cfg.read('config.ini')
+cfg.read(os.path.expanduser('~/.config/audio-reactive-led-strip/config'))
 
 UDP_IP = cfg['controller']['ip']
 """IP address of the ESP8266. Must match IP in esp32.ino"""
