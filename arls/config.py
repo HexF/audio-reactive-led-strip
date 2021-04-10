@@ -5,7 +5,8 @@ import os
 import configparser
 
 cfg = configparser.ConfigParser()
-cfg.read(os.path.expanduser('~/.config/audio-reactive-led-strip/config'))
+cfg.read('/etc/arls.cfg') # Import from /etc/ first
+cfg.read(os.path.expanduser('~/.config/audio-reactive-led-strip/config')) # Then allow user overrides
 
 UDP_IP = cfg['controller']['ip']
 """IP address of the ESP8266. Must match IP in esp32.ino"""
