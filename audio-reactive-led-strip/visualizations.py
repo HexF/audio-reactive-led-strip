@@ -1,4 +1,69 @@
+import numpy as np
+import config
+import dsp
+from scipy.ndimage.filters import gaussian_filter1d
+
+r_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
+                       alpha_decay=0.2, alpha_rise=0.99)
+g_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
+                       alpha_decay=0.05, alpha_rise=0.3)
+b_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
+                       alpha_decay=0.1, alpha_rise=0.5)
+common_mode = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
+                       alpha_decay=0.99, alpha_rise=0.01)
+p_filt = dsp.ExpFilter(np.tile(1, (3, config.N_PIXELS // 2)),
+                       alpha_decay=0.1, alpha_rise=0.99)
+
+gain = dsp.ExpFilter(np.tile(0.01, config.N_FFT_BINS),
+                     alpha_decay=0.001, alpha_rise=0.99)
+
 p = np.tile(1.0, (3, config.N_PIXELS // 2))
+
+
+def _interpolate(y, new_length):
+    """Intelligently resizes the array by linearly interpolating the values
+
+    Parameters
+    ----------
+    y : np.array
+        Array that should be resized
+
+    new_length : int
+        The length of the new interpolated array
+
+    Returns
+    -------
+    z : np.array
+        New array with length of new_length that contains the interpolated
+        values of y.
+    """
+    if len(y) == new_length:
+        return y
+    x_old = _normalized_linspace(len(y))
+    x_new = _normalized_linspace(new_length)
+    z = np.interp(x_new, x_old, y)
+    return z
+
+def memoize(function):
+    """Provides a decorator for memoizing functions"""
+    from functools import wraps
+    memo = {}
+
+    @wraps(function)
+    def wrapper(*args):
+        if args in memo:
+            return memo[args]
+        else:
+            rv = function(*args)
+            memo[args] = rv
+            return rv
+    return wrapper
+
+
+@memoize
+def _normalized_linspace(size):
+    return np.linspace(0, 1, size)
+
 
 def scroll(y):
     """Effect that originates in the center and scrolls outwards"""
@@ -58,7 +123,7 @@ _prev_spectrum = np.tile(0.01, config.N_PIXELS // 2)
 def spectrum(y):
     """Effect that maps the Mel filterbank frequencies onto the LED strip"""
     global _prev_spectrum
-    y = np.copy(interpolate(y, config.N_PIXELS // 2))
+    y = np.copy(_interpolate(y, config.N_PIXELS // 2))
     common_mode.update(y)
     diff = y - _prev_spectrum
     _prev_spectrum = np.copy(y)

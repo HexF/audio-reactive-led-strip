@@ -1,8 +1,8 @@
 from __future__ import print_function
 from __future__ import division
+from scipy.ndimage.filters import gaussian_filter1d
 import time
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter1d
 import config
 import microphone
 import dsp
@@ -40,67 +40,6 @@ def frames_per_second():
     if dt == 0.0:
         return _fps.value
     return _fps.update(1000.0 / dt)
-
-
-def memoize(function):
-    """Provides a decorator for memoizing functions"""
-    from functools import wraps
-    memo = {}
-
-    @wraps(function)
-    def wrapper(*args):
-        if args in memo:
-            return memo[args]
-        else:
-            rv = function(*args)
-            memo[args] = rv
-            return rv
-    return wrapper
-
-
-@memoize
-def _normalized_linspace(size):
-    return np.linspace(0, 1, size)
-
-
-def interpolate(y, new_length):
-    """Intelligently resizes the array by linearly interpolating the values
-
-    Parameters
-    ----------
-    y : np.array
-        Array that should be resized
-
-    new_length : int
-        The length of the new interpolated array
-
-    Returns
-    -------
-    z : np.array
-        New array with length of new_length that contains the interpolated
-        values of y.
-    """
-    if len(y) == new_length:
-        return y
-    x_old = _normalized_linspace(len(y))
-    x_new = _normalized_linspace(new_length)
-    z = np.interp(x_new, x_old, y)
-    return z
-
-
-r_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
-                       alpha_decay=0.2, alpha_rise=0.99)
-g_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
-                       alpha_decay=0.05, alpha_rise=0.3)
-b_filt = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
-                       alpha_decay=0.1, alpha_rise=0.5)
-common_mode = dsp.ExpFilter(np.tile(0.01, config.N_PIXELS // 2),
-                       alpha_decay=0.99, alpha_rise=0.01)
-p_filt = dsp.ExpFilter(np.tile(1, (3, config.N_PIXELS // 2)),
-                       alpha_decay=0.1, alpha_rise=0.99)
-
-gain = dsp.ExpFilter(np.tile(0.01, config.N_FFT_BINS),
-                     alpha_decay=0.001, alpha_rise=0.99)
 
 
 fft_plot_filter = dsp.ExpFilter(np.tile(1e-1, config.N_FFT_BINS),
@@ -151,22 +90,7 @@ def microphone_update(audio_samples):
         output = visualization_effect(mel)
         led.pixels = output
         led.update()
-        if config.USE_GUI:
-            # Plot filterbank output
-            x = np.linspace(config.MIN_FREQUENCY, config.MAX_FREQUENCY, len(mel))
-            mel_curve.setData(x=x, y=fft_plot_filter.update(mel))
-            # Plot the color channels
-            r_curve.setData(y=led.pixels[0])
-            g_curve.setData(y=led.pixels[1])
-            b_curve.setData(y=led.pixels[2])
-    if config.USE_GUI:
-        app.processEvents()
-    
-    if config.DISPLAY_FPS:
-        fps = frames_per_second()
-        if time.time() - 0.5 > prev_fps_update:
-            prev_fps_update = time.time()
-            print('FPS {:.0f} / {:.0f}'.format(fps, config.FPS))
+
 
 
 # Number of audio samples to read every time frame

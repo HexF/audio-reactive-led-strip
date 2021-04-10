@@ -27,7 +27,7 @@ def update():
     with a maximum of 2^16 LEDs.
 
     The packet encoding scheme is:
-        |l|h|r|g|b|
+        |h|l|r|g|b|
     where
         l (0 to 255): Low byte of LED Index
         h (0 to 255): High byte of LED Index
@@ -40,23 +40,22 @@ def update():
     pixels = np.clip(pixels, 0, 255).astype(int)
     # Optionally apply gamma correc tio
     p = _gamma[pixels] if config.SOFTWARE_GAMMA_CORRECTION else np.copy(pixels)
-    MAX_PIXELS_PER_PACKET = 126
+    MAX_PIXELS_PER_PACKET = 1024//5
     # Pixel indices
     idx = range(pixels.shape[1])
     idx = [i for i in idx if not np.array_equal(p[:, i], _prev_pixels[:, i])]
     n_packets = len(idx) // MAX_PIXELS_PER_PACKET + 1
     idx = np.array_split(idx, n_packets)
     for packet_indices in idx:
-        m = '' if _is_python_2 else []
+        m = []
         for i in packet_indices:
-            if _is_python_2:
-                m += chr(i//8) + chr(i>>8) + chr(p[0][i]) + chr(p[1][i]) + chr(p[2][i])
-            else:
-                m.append(i//8)  # Index of pixel to change
-                m.append(i>>8)
-                m.append(p[0][i])  # Pixel red value
-                m.append(p[1][i])  # Pixel green value
-                m.append(p[2][i])  # Pixel blue value
-        m = m if _is_python_2 else bytes(m)
+            m.append(i>>8)
+            m.append(i & 0xFF)  # Index of pixel to change
+            
+            m.append(p[0][i])  # Pixel red value
+            m.append(p[1][i])  # Pixel green value
+            m.append(p[2][i])  # Pixel blue value
+        m = bytes(m)
+
         _sock.sendto(m, (config.UDP_IP, config.UDP_PORT))
     _prev_pixels = np.copy(p)
