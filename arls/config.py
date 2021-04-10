@@ -5,6 +5,28 @@ import os
 import configparser
 
 cfg = configparser.ConfigParser()
+cfg.read_dict({
+    'general': {
+        'fps': '60',
+        'visualization': 'energy'
+    },
+    'controller': {
+        'ip':'127.0.0.1',
+        'port': '7777',
+        'pixel_count': '50'
+    },
+    'microphone': {
+        'sample_frequency': '44100'
+    },
+    'dsp': {
+        'min_frequency' = '200',
+        'max_frequency' = '12000',
+        'fft_bins' = '24',
+        'min_volume_threshold' = '1e-7',
+        'history_frames' = '2'
+    }
+})
+
 cfg.read('/etc/arls.cfg') # Import from /etc/ first
 cfg.read(os.path.expanduser('~/.config/audio-reactive-led-strip/config')) # Then allow user overrides
 
